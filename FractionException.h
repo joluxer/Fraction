@@ -3,6 +3,7 @@
 
 #include <stdexcept>
 #include <string>
+#include <exception>
 
 using namespace std;
 
