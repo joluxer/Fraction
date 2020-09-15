@@ -1,152 +1,104 @@
 #ifndef FRACTION_H
 #define FRACTION_H
 
-#include <iostream>
-#include <sstream>
-#include <climits>
-#include <cmath>
-#include <iomanip>
-#include <functional>
-
-#include "FractionException.h"
-
-class Fraction {
+class Fraction
+{
 
 public:
-	Fraction();
-	Fraction(int);
-	Fraction(int, int);
-	Fraction(float);
+  constexpr
+  Fraction() noexcept
+  : numerator(0), denominator(1)
+  {}
 
-	const static Fraction ZERO;
-	const static Fraction ONE;
-	const static Fraction MAX_VALUE;
-	const static Fraction MIN_VALUE;
-	const static Fraction PI;
+  constexpr
+  Fraction(int numerator_) noexcept
+  : numerator(numerator_), denominator(1)
+  {}
 
-	// Negative
-	Fraction operator-();
+  Fraction(int numerator, int denominator) noexcept;
 
-	// Common operations
-	Fraction operator+(const Fraction&);
-	Fraction operator+(const int&);
+  Fraction(float) noexcept;
 
-	Fraction operator-(const Fraction&);
-	Fraction operator-(const int&);
+  const static Fraction ZERO;
+  const static Fraction ONE;
+  const static Fraction MAX_VALUE;
+  const static Fraction MIN_VALUE;
+  const static Fraction PI;
 
-	Fraction operator*(const Fraction&);
-	Fraction operator*(const int&);
+  static int gcd(int, int) noexcept;
+  static int lcm(int, int) noexcept;
 
-	Fraction operator/(const Fraction&);
-	Fraction operator/(const int&);
+  // Negative
+  Fraction operator-() noexcept;
 
-	int operator%(const Fraction&);
-	int operator%(const int&);
+  // Common operations
+  Fraction operator+(const Fraction&) const noexcept;
+  Fraction operator+(const int&) const noexcept;
+  Fraction& operator+=(const Fraction&) noexcept;
+  Fraction& operator+=(const int&) noexcept;
 
-	// Comparators
-	bool operator==(const Fraction&);
-	bool operator==(const int&);
+  Fraction operator-(const Fraction&) const noexcept;
+  Fraction operator-(const int&) const noexcept;
+  Fraction& operator-=(const Fraction&) noexcept;
+  Fraction& operator-=(const int&) noexcept;
 
-	bool operator!=(const Fraction&);
-	bool operator!=(const int&);
+  Fraction operator*(const Fraction&) const noexcept;
+  Fraction operator*(const int&) const noexcept;
+  Fraction& operator*=(const Fraction&) noexcept;
+  Fraction& operator*=(const int&) noexcept;
 
-	bool operator>(const Fraction&);
-	bool operator>(const int&);
+  Fraction operator/(const Fraction&) const;
+  Fraction operator/(const int&) const;
+  Fraction& operator/=(const Fraction&);
+  Fraction& operator/=(const int&);
 
-	bool operator<(const Fraction&);
-	bool operator<(const int&);
+  int operator%(const Fraction&) const;
+  int operator%(const int&) const;
 
-	bool operator>=(const Fraction&);
-	bool operator>=(const int&);
+  // Comparators
+  bool operator==(const Fraction&) const noexcept;
+  bool operator==(const int&) const noexcept;
 
-	bool operator<=(const Fraction&);
-	bool operator<=(const int&);
+  bool operator!=(const Fraction&) const noexcept;
+  bool operator!=(const int&) const noexcept;
 
-	double getDoubleValue() const ;
-	float getFloatValue() const ;
+  bool operator>(const Fraction&) const noexcept;
+  bool operator>(const int&) const noexcept;
 
-	const std::string toString() const;
+  bool operator<(const Fraction&) const noexcept;
+  bool operator<(const int&) const noexcept;
 
-	friend std::ostream& operator<<(std::ostream &strm, Fraction fraction) {
-	  return strm << fraction.toString();
-	}
+  bool operator>=(const Fraction&) const noexcept;
+  bool operator>=(const int&) const noexcept;
+
+  bool operator<=(const Fraction&) const noexcept;
+  bool operator<=(const int&) const noexcept;
+
+  double getDoubleValue() const noexcept;
+  float getFloatValue() const noexcept;
+
+  // numerator/denominator
+  int numerator;
+  int denominator;
 
 private:
-	// numerator/denominator
-	int numerator;
-	int denominator;
+  // Utils methods
+  static void checkDivisionByZero(int);
+  static int mantissaToInteger(float, int*) noexcept;
+  void simplify() noexcept;
 
+  // Generic functional comparator
+  template<typename ComparisonOperator>
+  bool comparison(const Fraction &f2, ComparisonOperator operation) const noexcept;
 
-	// Utils methods
-	void checkDivisionByZero(const Fraction&, int) const;
-	int gcd(int, int) const;
-	int lcm(int, int) const;
-	int mantissaToInteger(float, int*) const;
-	void simplify();
+  template<typename ComparisonOperator>
+  bool comparison(const int &i1, ComparisonOperator operation) const noexcept;
 
-	// Generic functional comparator
-	template <typename ComparisonOperator>
-	bool comparison(const Fraction& f1,
-					const Fraction& f2,
-					ComparisonOperator operation) {
+  template<typename PlusMinusOperator>
+  Fraction& commonOperation(const Fraction &f2, PlusMinusOperator operation, Fraction&) const noexcept;
 
-		if(f1.denominator == f2.denominator) {
-			return operation(f1.numerator, f2.numerator);
-		}
-
-		int lcm = f1.lcm(f1.denominator, f2.denominator);
-
-		return operation(f1.numerator * (lcm / f1.denominator),
-						f2.numerator * (lcm / f2.denominator));
-	}
-
-	template <typename ComparisonOperator>
-	bool comparison(const Fraction& f1,
-					const int& i1,
-					ComparisonOperator operation) {
-
-		if(this->denominator == 1) {
-			return this->numerator == i1;
-		}
-
-		return operation(this->numerator,
-						i1 * this->denominator);
-	}
-
-	template<typename PlusMinusOperator>
-	Fraction commonOperation(const Fraction& f1,
-							 const Fraction& f2,
-							 PlusMinusOperator operation) {
-
-		int lcm = f1.lcm(f1.denominator, f2.denominator);
-
-		Fraction fraction(
-				operation(
-					f1.numerator * (lcm / f1.denominator),
-					f2.numerator * (lcm / f2.denominator)
-				), lcm);
-
-		fraction.simplify();
-
-		return fraction;
-	}
-
-	template<typename PlusMinusOperator>
-	Fraction commonOperation(const Fraction& f1,
-							 const int& i1,
-							 PlusMinusOperator operation) {
-		Fraction fraction(
-				operation(
-					f1.numerator,
-					i1 * f1.denominator
-				), f1.denominator);
-
-		fraction.simplify();
-
-		return fraction;
-	}
-
+  template<typename PlusMinusOperator>
+  Fraction& commonOperation(const int &i1, PlusMinusOperator operation, Fraction&) const noexcept;
 };
-
 
 #endif

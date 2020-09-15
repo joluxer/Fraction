@@ -1,3 +1,8 @@
-main
-main.exe
+fraction-demo-assert
+fraction-demo-assert.exe
+fraction-demo-exception
+fraction-demo-exception.exe
 a.out
+/.cproject
+/.project
+/.settings/

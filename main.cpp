@@ -2,6 +2,8 @@
 #include <exception>
 
 #include "Fraction.h"
+#include "FractionStream.h"
+#include "FractionException.h"
 
 int main() {
 
